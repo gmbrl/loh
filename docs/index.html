@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LOH — Land & Cadastral Registry Documentation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1f2328;
+    background: #ffffff;
+  }
+  a { color: #3b82d4; }
+
+  .page { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+
+  .cover { border-bottom: 2px solid #e5e7eb; padding-bottom: 2rem; margin-bottom: 2.5rem; }
+  .cover h1 { font-size: 28px; font-weight: 700; letter-spacing: -.3px; margin-bottom: .4rem; }
+  .cover .subtitle { font-size: 15px; color: #57606a; }
+  .cover .meta { margin-top: 1rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .cover .meta span { font-size: 12px; color: #57606a; background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 4px; padding: 3px 10px; }
+
+  .section { margin-bottom: 3rem; }
+  .section h2 { font-size: 18px; font-weight: 700; border-bottom: 2px solid #3b82d4; padding-bottom: .4rem; margin-bottom: 1.25rem; color: #1f2328; }
+  .section h3 { font-size: 14px; font-weight: 700; margin: 1.25rem 0 .5rem; color: #1f2328; }
+  .section p  { margin-bottom: .75rem; color: #24292f; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1rem; }
+  th { background: #f7f8fa; border: 1px solid #e5e7eb; padding: 7px 10px; text-align: left; font-weight: 600; color: #57606a; }
+  td { border: 1px solid #e5e7eb; padding: 7px 10px; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+  .b-blue   { background: #dbeafe; color: #1e40af; }
+  .b-green  { background: #d1fae5; color: #065f46; }
+  .b-purple { background: #ede9fe; color: #5b21b6; }
+  .b-yellow { background: #fef3c7; color: #92400e; }
+  .b-red    { background: #fee2e2; color: #991b1b; }
+  .b-gray   { background: #f3f4f6; color: #374151; }
+
+  .diag { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.25rem; overflow-x: auto; }
+
+  svg { display: block; max-width: 100%; height: auto; }
+
+  .stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .stack-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; background: #fafafa; }
+  .stack-card .layer { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #57606a; margin-bottom: .3rem; }
+  .stack-card .tech  { font-size: 13px; font-weight: 600; color: #1f2328; }
+  .stack-card .desc  { font-size: 12px; color: #57606a; margin-top: .2rem; }
+
+  .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  .role-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: .9rem 1rem; }
+  .role-card .rname { font-weight: 700; font-size: 13px; margin-bottom: .25rem; }
+  .role-card ul { padding-left: 1.1rem; font-size: 12px; color: #57606a; }
+  .role-card ul li { margin-bottom: .15rem; }
+
+  .footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover">
+    <h1>&#127963; LOH &mdash; Land &amp; Cadastral Registry</h1>
+    <div class="subtitle">Full-stack land records management platform implementing the Professional Authority Model</div>
+    <div class="meta">
+      <span>Vue 3 + Vite</span>
+      <span>FastAPI (Python 3.12)</span>
+      <span>PostgreSQL 15</span>
+      <span>JWT Auth</span>
+      <span>Docker Compose</span>
+      <span>Role-based Access Control</span>
+    </div>
+  </div>
+
+  <!-- 1. PURPOSE -->
+  <div class="section">
+    <h2>1. Purpose &amp; Scope</h2>
+    <p>LOH is a web-based land administration system that enforces the <strong>Professional Authority Model</strong> &mdash;
+    a controlled division of labour between surveyors, cadastral officers, lawyers, registrars, banks,
+    courts, municipalities, tax authorities, and citizens.</p>
+    <p>No single user can unilaterally alter authoritative records. Every action is gated by role,
+    every registration requires a prior approval step, and every substantive change requires
+    documentary evidence or a court order. The system records an immutable audit trail for every title change.</p>
+    <table>
+      <thead><tr><th>Domain</th><th>What the system manages</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Parcel creation</strong></td><td>Survey plan submission &rarr; cadastral review &rarr; official parcel activation</td></tr>
+        <tr><td><strong>Title registration</strong></td><td>Application &rarr; instrument preparation &rarr; registrar decision &rarr; title record</td></tr>
+        <tr><td><strong>Encumbrances</strong></td><td>Mortgages, tax liens, court seizures, municipal restrictions, easements, and releases</td></tr>
+        <tr><td><strong>Corrections</strong></td><td>Three-level correction workflow: clerical, technical, substantive</td></tr>
+        <tr><td><strong>Queries</strong></td><td>Tiered public/restricted search across parcels, titles, and encumbrances</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. ARCHITECTURE -->
+  <div class="section">
+    <h2>2. System Architecture</h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="layer">Frontend</div>
+        <div class="tech">Vue 3 + Vite</div>
+        <div class="desc">Pinia state &middot; Vue Router &middot; Axios &middot; role-aware UI</div>
+      </div>
+      <div class="stack-card">
+        <div class="layer">Backend</div>
+        <div class="tech">FastAPI (Python)</div>
+        <div class="desc">SQLAlchemy 2 &middot; Pydantic v2 &middot; JWT auth &middot; RBAC permission layer</div>
+      </div>
+      <div class="stack-card">
+        <div class="layer">Database</div>
+        <div class="tech">PostgreSQL 15</div>
+        <div class="desc">Relational schema &middot; 8 core tables &middot; append-only history table</div>
+      </div>
+    </div>
+    <div class="diag">
+      <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="12">
+        <rect x="20" y="120" width="140" height="100" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+        <text x="90" y="158" text-anchor="middle" font-weight="700" fill="#1e40af">Browser</text>
+        <text x="90" y="175" text-anchor="middle" fill="#1e40af">Vue 3 + Vite</text>
+        <text x="90" y="191" text-anchor="middle" fill="#3b82f6">:5173</text>
+        <text x="90" y="207" text-anchor="middle" fill="#3b82f6" font-size="10">Pinia &middot; Vue Router</text>
+        <line x1="160" y1="170" x2="245" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="202" y="163" text-anchor="middle" fill="#57606a" font-size="10">HTTP/JSON</text>
+        <text x="202" y="176" text-anchor="middle" fill="#57606a" font-size="10">/api proxy</text>
+        <rect x="245" y="80" width="160" height="180" rx="6" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+        <text x="325" y="110" text-anchor="middle" font-weight="700" fill="#065f46">FastAPI Backend</text>
+        <text x="325" y="128" text-anchor="middle" fill="#065f46">:8000</text>
+        <line x1="255" y1="138" x2="395" y2="138" stroke="#6ee7b7" stroke-width="1"/>
+        <text x="325" y="155" text-anchor="middle" fill="#065f46" font-size="11">Routers</text>
+        <text x="325" y="170" text-anchor="middle" fill="#374151" font-size="10">parcels &middot; titles</text>
+        <text x="325" y="184" text-anchor="middle" fill="#374151" font-size="10">encumbrances &middot; corrections</text>
+        <text x="325" y="198" text-anchor="middle" fill="#374151" font-size="10">auth &middot; users &middot; query</text>
+        <line x1="255" y1="208" x2="395" y2="208" stroke="#6ee7b7" stroke-width="1"/>
+        <text x="325" y="224" text-anchor="middle" fill="#065f46" font-size="11">RBAC Permissions</text>
+        <text x="325" y="240" text-anchor="middle" fill="#374151" font-size="10">10 roles &middot; 30+ permissions</text>
+        <line x1="405" y1="170" x2="490" y2="170" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="447" y="163" text-anchor="middle" fill="#57606a" font-size="10">SQLAlchemy</text>
+        <text x="447" y="176" text-anchor="middle" fill="#57606a" font-size="10">ORM</text>
+        <rect x="490" y="80" width="160" height="180" rx="6" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.5"/>
+        <text x="570" y="110" text-anchor="middle" font-weight="700" fill="#5b21b6">PostgreSQL</text>
+        <text x="570" y="128" text-anchor="middle" fill="#5b21b6">:5432</text>
+        <line x1="500" y1="138" x2="640" y2="138" stroke="#c4b5fd" stroke-width="1"/>
+        <text x="570" y="155" text-anchor="middle" fill="#5b21b6" font-size="11">Tables</text>
+        <text x="570" y="170" text-anchor="middle" fill="#374151" font-size="10">users &middot; parcels</text>
+        <text x="570" y="184" text-anchor="middle" fill="#374151" font-size="10">survey_plans &middot; titles</text>
+        <text x="570" y="198" text-anchor="middle" fill="#374151" font-size="10">title_history &middot; encumbrances</text>
+        <text x="570" y="212" text-anchor="middle" fill="#374151" font-size="10">correction_requests</text>
+        <text x="570" y="226" text-anchor="middle" fill="#374151" font-size="10">title_applications</text>
+        <rect x="20" y="290" width="630" height="28" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="335" y="309" text-anchor="middle" fill="#64748b" font-size="11">Docker Compose &mdash; all three containers on the same bridge network</text>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 3. DATA MODEL -->
+  <div class="section">
+    <h2>3. Data Model</h2>
+    <div class="diag">
+      <svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="11">
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <rect x="10" y="10" width="130" height="90" rx="5" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5"/>
+        <rect x="10" y="10" width="130" height="22" rx="5" fill="#fbbf24"/>
+        <text x="75" y="25" text-anchor="middle" font-weight="700" fill="#fff">users</text>
+        <text x="18" y="48" fill="#374151">id (PK)</text>
+        <text x="18" y="62" fill="#374151">email &middot; full_name</text>
+        <text x="18" y="76" fill="#374151">role &middot; hashed_password</text>
+        <text x="18" y="90" fill="#374151">is_active &middot; created_at</text>
+        <rect x="180" y="10" width="145" height="105" rx="5" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.5"/>
+        <rect x="180" y="10" width="145" height="22" rx="5" fill="#60a5fa"/>
+        <text x="252" y="25" text-anchor="middle" font-weight="700" fill="#fff">survey_plans</text>
+        <text x="188" y="48" fill="#374151">id (PK)</text>
+        <text x="188" y="62" fill="#374151">reference_number</text>
+        <text x="188" y="76" fill="#374151">geometry &middot; area_sqm</text>
+        <text x="188" y="90" fill="#374151">status &middot; submitted_by (FK)</text>
+        <text x="188" y="104" fill="#374151">reviewed_by (FK)</text>
+        <rect x="180" y="145" width="145" height="120" rx="5" fill="#d1fae5" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="180" y="145" width="145" height="22" rx="5" fill="#34d399"/>
+        <text x="252" y="160" text-anchor="middle" font-weight="700" fill="#fff">parcels</text>
+        <text x="188" y="183" fill="#374151">id (PK)</text>
+        <text x="188" y="197" fill="#374151">parcel_identifier</text>
+        <text x="188" y="211" fill="#374151">geometry &middot; area_sqm</text>
+        <text x="188" y="225" fill="#374151">land_use &middot; status</text>
+        <text x="188" y="239" fill="#374151">survey_plan_id (FK)</text>
+        <text x="188" y="253" fill="#374151">created_by (FK)</text>
+        <rect x="370" y="10" width="155" height="120" rx="5" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5"/>
+        <rect x="370" y="10" width="155" height="22" rx="5" fill="#a78bfa"/>
+        <text x="447" y="25" text-anchor="middle" font-weight="700" fill="#fff">title_applications</text>
+        <text x="378" y="48" fill="#374151">id (PK)</text>
+        <text x="378" y="62" fill="#374151">parcel_id (FK)</text>
+        <text x="378" y="76" fill="#374151">instrument_type &middot; status</text>
+        <text x="378" y="90" fill="#374151">proposed_owner_name</text>
+        <text x="378" y="104" fill="#374151">submitted_by (FK)</text>
+        <text x="378" y="118" fill="#374151">registrar_id (FK)</text>
+        <rect x="370" y="160" width="155" height="105" rx="5" fill="#fce7f3" stroke="#f472b6" stroke-width="1.5"/>
+        <rect x="370" y="160" width="155" height="22" rx="5" fill="#f472b6"/>
+        <text x="447" y="175" text-anchor="middle" font-weight="700" fill="#fff">titles</text>
+        <text x="378" y="198" fill="#374151">id (PK)</text>
+        <text x="378" y="212" fill="#374151">title_number (unique)</text>
+        <text x="378" y="226" fill="#374151">parcel_id (FK)</text>
+        <text x="378" y="240" fill="#374151">owner_name &middot; status</text>
+        <text x="378" y="254" fill="#374151">application_id (FK)</text>
+        <rect x="370" y="295" width="155" height="90" rx="5" fill="#fce7f3" stroke="#f9a8d4" stroke-width="1.5"/>
+        <rect x="370" y="295" width="155" height="22" rx="5" fill="#f9a8d4"/>
+        <text x="447" y="310" text-anchor="middle" font-weight="700" fill="#5b21b6">title_history</text>
+        <text x="378" y="333" fill="#374151">id (PK)</text>
+        <text x="378" y="347" fill="#374151">title_id (FK)</text>
+        <text x="378" y="361" fill="#374151">event &middot; detail &middot; recorded_at</text>
+        <text x="378" y="375" fill="#374151">recorded_by (FK)</text>
+        <rect x="570" y="10" width="155" height="135" rx="5" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.5"/>
+        <rect x="570" y="10" width="155" height="22" rx="5" fill="#fca5a5"/>
+        <text x="647" y="25" text-anchor="middle" font-weight="700" fill="#991b1b">encumbrances</text>
+        <text x="578" y="48" fill="#374151">id (PK)</text>
+        <text x="578" y="62" fill="#374151">title_id (FK, nullable)</text>
+        <text x="578" y="76" fill="#374151">parcel_id (FK, nullable)</text>
+        <text x="578" y="90" fill="#374151">encumbrance_type</text>
+        <text x="578" y="104" fill="#374151">status &middot; submitted_by (FK)</text>
+        <text x="578" y="118" fill="#374151">approved_by (FK)</text>
+        <text x="578" y="132" fill="#374151">released_by (FK)</text>
+        <rect x="570" y="175" width="155" height="120" rx="5" fill="#fef9c3" stroke="#fde68a" stroke-width="1.5"/>
+        <rect x="570" y="175" width="155" height="22" rx="5" fill="#fde68a"/>
+        <text x="647" y="190" text-anchor="middle" font-weight="700" fill="#78350f">correction_requests</text>
+        <text x="578" y="213" fill="#374151">id (PK)</text>
+        <text x="578" y="227" fill="#374151">parcel_id (FK, nullable)</text>
+        <text x="578" y="241" fill="#374151">title_id (FK, nullable)</text>
+        <text x="578" y="255" fill="#374151">correction_level &middot; status</text>
+        <text x="578" y="269" fill="#374151">submitted_by (FK)</text>
+        <text x="578" y="283" fill="#374151">reviewed_by (FK)</text>
+        <line x1="140" y1="55" x2="180" y2="55" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="252" y1="115" x2="252" y2="145" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="325" y1="205" x2="370" y2="205" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="295" y1="155" x2="370" y2="80" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr2)"/>
+        <line x1="447" y1="130" x2="447" y2="160" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="447" y1="265" x2="447" y2="295" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="525" y1="200" x2="570" y2="90" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr2)"/>
+        <line x1="325" y1="265" x2="570" y2="265" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr2)"/>
+      </svg>
+    </div>
+    <table>
+      <thead><tr><th>Table</th><th>Purpose</th><th>Key constraint</th></tr></thead>
+      <tbody>
+        <tr><td><strong>users</strong></td><td>All system actors with their role</td><td>Email unique; role is an enum of 10 values</td></tr>
+        <tr><td><strong>survey_plans</strong></td><td>Technical boundary surveys submitted by surveyors</td><td>status: pending &rarr; approved / rejected</td></tr>
+        <tr><td><strong>parcels</strong></td><td>Official cadastral parcel, activated after survey approval</td><td>Requires an approved survey_plan; parcel_identifier unique</td></tr>
+        <tr><td><strong>title_applications</strong></td><td>Pending ownership registration requests</td><td>Parcel must be active; only registrar can approve</td></tr>
+        <tr><td><strong>titles</strong></td><td>Authoritative ownership record</td><td>title_number unique; only created on application approval</td></tr>
+        <tr><td><strong>title_history</strong></td><td>Immutable audit log of every title event</td><td>Append-only; never updated or deleted</td></tr>
+        <tr><td><strong>encumbrances</strong></td><td>Mortgages, liens, seizures, easements etc.</td><td>Type determines which role may submit; registrar approves</td></tr>
+        <tr><td><strong>correction_requests</strong></td><td>Three-level correction workflow</td><td>Level determines required submitter role and approval authority</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. ROLE MODEL -->
+  <div class="section">
+    <h2>4. Role &amp; Permission Model</h2>
+    <p>Every API action is checked against a central permission table in <code>backend/app/core/permissions.py</code>. No role can exceed its defined boundary.</p>
+    <div class="role-grid">
+      <div class="role-card">
+        <div class="rname"><span class="badge b-blue">surveyor</span></div>
+        <ul><li>Submit survey plans</li><li>View survey plans and parcels (detail)</li><li>Submit technical correction requests</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-green">cadastral_officer</span></div>
+        <ul><li>Approve or reject survey plans</li><li>Create official parcels</li><li>Submit and approve clerical &amp; technical corrections</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-purple">lawyer_notary</span></div>
+        <ul><li>Prepare and submit title instruments</li><li>Submit private encumbrances (leases, easements)</li><li>Read full title records for authorized transactions</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-yellow">registrar</span></div>
+        <ul><li>Examine and decide on title applications</li><li>Approve and release encumbrances</li><li>Approve clerical corrections</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-gray">bank</span></div>
+        <ul><li>Submit mortgage instruments</li><li>Release mortgages</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-red">tax_authority</span></div>
+        <ul><li>Submit tax liens</li><li>Release tax liens</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-red">court</span></div>
+        <ul><li>Submit court seizures and judgment liens</li><li>Submit substantive correction orders</li><li>Release court orders</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-gray">municipality</span></div>
+        <ul><li>Submit municipal restrictions</li><li>Submit public rights-of-way</li><li>Release municipal encumbrances</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-gray">citizen</span></div>
+        <ul><li>Initiate title applications</li><li>Submit adverse claims and private encumbrances</li><li>Query public records</li></ul>
+      </div>
+      <div class="role-card">
+        <div class="rname"><span class="badge b-yellow">admin</span></div>
+        <ul><li>All permissions</li><li>Create and manage user accounts</li><li>Assign roles</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. FLOW DIAGRAMS -->
+  <div class="section">
+    <h2>5. End-to-End Workflow Flows</h2>
+
+    <h3>5A &mdash; Parcel Creation Flow</h3>
+    <div class="diag">
+      <svg viewBox="0 0 740 100" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="11">
+        <defs><marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#64748b"/></marker></defs>
+        <rect x="5" y="30" width="110" height="36" rx="5" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.2"/>
+        <text x="60" y="51" text-anchor="middle" fill="#1e40af" font-weight="600">Surveyor</text>
+        <text x="60" y="63" text-anchor="middle" fill="#1e40af">Submits survey plan</text>
+        <rect x="155" y="30" width="120" height="36" rx="5" fill="#d1fae5" stroke="#34d399" stroke-width="1.2"/>
+        <text x="215" y="51" text-anchor="middle" fill="#065f46" font-weight="600">Cadastral Officer</text>
+        <text x="215" y="63" text-anchor="middle" fill="#065f46">Reviews survey plan</text>
+        <rect x="325" y="30" width="100" height="36" rx="5" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.2"/>
+        <text x="375" y="51" text-anchor="middle" fill="#92400e" font-weight="600">Approved?</text>
+        <text x="375" y="63" text-anchor="middle" fill="#92400e">Yes / No</text>
+        <rect x="475" y="30" width="120" height="36" rx="5" fill="#d1fae5" stroke="#34d399" stroke-width="1.2"/>
+        <text x="535" y="51" text-anchor="middle" fill="#065f46" font-weight="600">Cadastral Officer</text>
+        <text x="535" y="63" text-anchor="middle" fill="#065f46">Creates official Parcel</text>
+        <rect x="645" y="30" width="90" height="36" rx="5" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="690" y="51" text-anchor="middle" fill="#5b21b6" font-weight="600">Parcel ID</text>
+        <text x="690" y="63" text-anchor="middle" fill="#5b21b6">Assigned</text>
+        <line x1="115" y1="48" x2="155" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a3)"/>
+        <line x1="275" y1="48" x2="325" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a3)"/>
+        <line x1="425" y1="48" x2="475" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a3)"/>
+        <line x1="595" y1="48" x2="645" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a3)"/>
+        <line x1="375" y1="66" x2="375" y2="88" stroke="#ef4444" stroke-width="1.2"/>
+        <line x1="375" y1="88" x2="215" y2="88" stroke="#ef4444" stroke-width="1.2"/>
+        <line x1="215" y1="88" x2="215" y2="66" stroke="#ef4444" stroke-width="1.2" marker-end="url(#a3)"/>
+        <text x="295" y="97" text-anchor="middle" fill="#ef4444" font-size="10">Rejected &rarr; back to surveyor</text>
+      </svg>
+    </div>
+
+    <h3>5B &mdash; Title Registration Flow</h3>
+    <div class="diag">
+      <svg viewBox="0 0 780 110" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="11">
+        <defs><marker id="a4" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#64748b"/></marker></defs>
+        <rect x="5" y="30" width="110" height="36" rx="5" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.2"/>
+        <text x="60" y="51" text-anchor="middle" fill="#1e40af" font-weight="600">Citizen /</text>
+        <text x="60" y="63" text-anchor="middle" fill="#1e40af">Lawyer-Notary</text>
+        <rect x="165" y="30" width="110" height="36" rx="5" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.2"/>
+        <text x="220" y="51" text-anchor="middle" fill="#5b21b6" font-weight="600">Application</text>
+        <text x="220" y="63" text-anchor="middle" fill="#5b21b6">Submitted</text>
+        <rect x="330" y="30" width="120" height="36" rx="5" fill="#fce7f3" stroke="#f472b6" stroke-width="1.2"/>
+        <text x="390" y="51" text-anchor="middle" fill="#9d174d" font-weight="600">Registrar</text>
+        <text x="390" y="63" text-anchor="middle" fill="#9d174d">Reviews application</text>
+        <rect x="510" y="30" width="100" height="36" rx="5" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.2"/>
+        <text x="560" y="51" text-anchor="middle" fill="#92400e" font-weight="600">Approved?</text>
+        <text x="560" y="63" text-anchor="middle" fill="#92400e">Yes / No</text>
+        <rect x="668" y="30" width="105" height="36" rx="5" fill="#d1fae5" stroke="#34d399" stroke-width="1.2"/>
+        <text x="720" y="51" text-anchor="middle" fill="#065f46" font-weight="600">Title Created</text>
+        <text x="720" y="63" text-anchor="middle" fill="#065f46">+ History entry</text>
+        <line x1="115" y1="48" x2="165" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a4)"/>
+        <line x1="275" y1="48" x2="330" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a4)"/>
+        <line x1="450" y1="48" x2="510" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a4)"/>
+        <line x1="610" y1="48" x2="668" y2="48" stroke="#64748b" stroke-width="1.2" marker-end="url(#a4)"/>
+        <line x1="560" y1="66" x2="560" y2="90" stroke="#ef4444" stroke-width="1.2"/>
+        <line x1="560" y1="90" x2="390" y2="90" stroke="#ef4444" stroke-width="1.2"/>
+        <line x1="390" y1="90" x2="390" y2="66" stroke="#ef4444" stroke-width="1.2" marker-end="url(#a4)"/>
+        <text x="475" y="100" text-anchor="middle" fill="#ef4444" font-size="10">Rejected &rarr; request correction</text>
+      </svg>
+    </div>
+
+    <h3>5C &mdash; Encumbrance Registration Flow</h3>
+    <div class="diag">
+      <svg viewBox="0 0 780 80" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="11">
+        <defs><marker id="a5" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#64748b"/></marker></defs>
+        <rect x="5" y="22" width="130" height="36" rx="5" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.2"/>
+        <text x="70" y="43" text-anchor="middle" fill="#991b1b" font-weight="600">Originating Authority</text>
+        <text x="70" y="55" text-anchor="middle" fill="#991b1b">Bank / Court / Tax / Muni</text>
+        <rect x="190" y="22" width="120" height="36" rx="5" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.2"/>
+        <text x="250" y="43" text-anchor="middle" fill="#991b1b" font-weight="600">Instrument</text>
+        <text x="250" y="55" text-anchor="middle" fill="#991b1b">Submitted (type-gated)</text>
+        <rect x="365" y="22" width="110" height="36" rx="5" fill="#fce7f3" stroke="#f472b6" stroke-width="1.2"/>
+        <text x="420" y="43" text-anchor="middle" fill="#9d174d" font-weight="600">Registrar</text>
+        <text x="420" y="55" text-anchor="middle" fill="#9d174d">Approves &rarr; Active</text>
+        <rect x="530" y="22" width="110" height="36" rx="5" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.2"/>
+        <text x="585" y="43" text-anchor="middle" fill="#374151" font-weight="600">Active on Title</text>
+        <text x="585" y="55" text-anchor="middle" fill="#374151">Visible to all</text>
+        <rect x="695" y="22" width="80" height="36" rx="5" fill="#d1fae5" stroke="#34d399" stroke-width="1.2"/>
+        <text x="735" y="43" text-anchor="middle" fill="#065f46" font-weight="600">Released</text>
+        <text x="735" y="55" text-anchor="middle" fill="#065f46">by originator</text>
+        <line x1="135" y1="40" x2="190" y2="40" stroke="#64748b" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="310" y1="40" x2="365" y2="40" stroke="#64748b" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="475" y1="40" x2="530" y2="40" stroke="#64748b" stroke-width="1.2" marker-end="url(#a5)"/>
+        <line x1="640" y1="40" x2="695" y2="40" stroke="#64748b" stroke-width="1.2" marker-end="url(#a5)"/>
+      </svg>
+    </div>
+
+    <h3>5D &mdash; Correction Request Flow</h3>
+    <div class="diag">
+      <svg viewBox="0 0 780 130" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,system-ui,sans-serif" font-size="11">
+        <defs><marker id="a6" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#64748b"/></marker></defs>
+        <text x="5" y="28" fill="#57606a" font-weight="700" font-size="10">CLERICAL</text>
+        <text x="5" y="63" fill="#57606a" font-weight="700" font-size="10">TECHNICAL</text>
+        <text x="5" y="98" fill="#57606a" font-weight="700" font-size="10">SUBSTANTIVE</text>
+        <rect x="90" y="14" width="110" height="24" rx="4" fill="#dbeafe" stroke="#60a5fa" stroke-width="1"/>
+        <text x="145" y="30" text-anchor="middle" fill="#1e40af">Registrar / Cad. Officer</text>
+        <line x1="200" y1="26" x2="240" y2="26" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="240" y="14" width="100" height="24" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="1"/>
+        <text x="290" y="30" text-anchor="middle" fill="#065f46">Admin correction</text>
+        <line x1="340" y1="26" x2="380" y2="26" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="380" y="14" width="90" height="24" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="1"/>
+        <text x="425" y="30" text-anchor="middle" fill="#065f46">Audit trail only</text>
+        <rect x="90" y="50" width="110" height="24" rx="4" fill="#dbeafe" stroke="#60a5fa" stroke-width="1"/>
+        <text x="145" y="66" text-anchor="middle" fill="#1e40af">Surveyor submits</text>
+        <line x1="200" y1="62" x2="240" y2="62" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="240" y="50" width="110" height="24" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="1"/>
+        <text x="295" y="66" text-anchor="middle" fill="#065f46">Cadastral Officer</text>
+        <line x1="350" y1="62" x2="390" y2="62" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="390" y="50" width="110" height="24" rx="4" fill="#fef3c7" stroke="#fbbf24" stroke-width="1"/>
+        <text x="445" y="66" text-anchor="middle" fill="#92400e">Notice to owners</text>
+        <line x1="500" y1="62" x2="540" y2="62" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="540" y="50" width="100" height="24" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="1"/>
+        <text x="590" y="66" text-anchor="middle" fill="#065f46">Record updated</text>
+        <rect x="90" y="86" width="100" height="24" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+        <text x="140" y="102" text-anchor="middle" fill="#991b1b">Court issues order</text>
+        <line x1="190" y1="98" x2="230" y2="98" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="230" y="86" width="110" height="24" rx="4" fill="#fce7f3" stroke="#f472b6" stroke-width="1"/>
+        <text x="285" y="102" text-anchor="middle" fill="#9d174d">Registrar receives</text>
+        <line x1="340" y1="98" x2="380" y2="98" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="380" y="86" width="100" height="24" rx="4" fill="#fef3c7" stroke="#fbbf24" stroke-width="1"/>
+        <text x="430" y="102" text-anchor="middle" fill="#92400e">Parties notified</text>
+        <line x1="480" y1="98" x2="520" y2="98" stroke="#64748b" stroke-width="1.2" marker-end="url(#a6)"/>
+        <rect x="520" y="86" width="100" height="24" rx="4" fill="#d1fae5" stroke="#34d399" stroke-width="1"/>
+        <text x="570" y="102" text-anchor="middle" fill="#065f46">Title amended</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 6. API -->
+  <div class="section">
+    <h2>6. API Surface</h2>
+    <table>
+      <thead><tr><th>Method</th><th>Path</th><th>Who</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>POST</td><td>/auth/login</td><td>All</td><td>Obtain JWT token</td></tr>
+        <tr><td>GET</td><td>/auth/me</td><td>All</td><td>Current user profile</td></tr>
+        <tr><td>GET / POST</td><td>/users/</td><td>admin</td><td>List / create users</td></tr>
+        <tr><td>PATCH</td><td>/users/{id}</td><td>admin</td><td>Update role or status</td></tr>
+        <tr><td>POST</td><td>/parcels/surveys</td><td>surveyor</td><td>Submit a survey plan</td></tr>
+        <tr><td>GET</td><td>/parcels/surveys</td><td>privileged roles</td><td>List survey plans</td></tr>
+        <tr><td>POST</td><td>/parcels/surveys/{id}/review</td><td>cadastral_officer</td><td>Approve or reject survey</td></tr>
+        <tr><td>POST</td><td>/parcels/</td><td>cadastral_officer</td><td>Activate official parcel</td></tr>
+        <tr><td>GET</td><td>/parcels/</td><td>all</td><td>List parcels</td></tr>
+        <tr><td>POST</td><td>/titles/applications</td><td>lawyer_notary, citizen</td><td>Submit title application</td></tr>
+        <tr><td>POST</td><td>/titles/applications/{id}/decide</td><td>registrar</td><td>Approve / reject application</td></tr>
+        <tr><td>GET</td><td>/titles/</td><td>all</td><td>List registered titles</td></tr>
+        <tr><td>GET</td><td>/titles/{id}/history</td><td>privileged roles</td><td>Audit trail for a title</td></tr>
+        <tr><td>POST</td><td>/encumbrances/</td><td>role-gated by type</td><td>Submit encumbrance</td></tr>
+        <tr><td>POST</td><td>/encumbrances/{id}/approve</td><td>registrar</td><td>Activate encumbrance</td></tr>
+        <tr><td>POST</td><td>/encumbrances/{id}/release</td><td>originating role</td><td>Release encumbrance</td></tr>
+        <tr><td>POST</td><td>/corrections/</td><td>level-gated by role</td><td>Submit correction request</td></tr>
+        <tr><td>POST</td><td>/corrections/{id}/review</td><td>cadastral_officer, registrar</td><td>Approve / reject correction</td></tr>
+        <tr><td>GET</td><td>/query/parcels</td><td>all</td><td>Search parcels by identifier / land use</td></tr>
+        <tr><td>GET</td><td>/query/titles</td><td>all</td><td>Search titles by number / parcel</td></tr>
+        <tr><td>GET</td><td>/query/encumbrances</td><td>all</td><td>Search encumbrances by title / parcel / type</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#57606a">Full interactive docs at <strong>http://localhost:8000/docs</strong> when the backend is running.</p>
+  </div>
+
+  <!-- 7. FILE STRUCTURE -->
+  <div class="section">
+    <h2>7. Project File Structure</h2>
+    <div class="diag" style="font-size:12px;font-family:monospace;line-height:1.8;color:#1f2328;">
+      loh/<br>
+      &#9500;&#9472;&#9472; <strong>backend/</strong><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; app/<br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; core/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#57606a"># config, security, RBAC permissions</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; models/ &nbsp;&nbsp;&nbsp;<span style="color:#57606a"># SQLAlchemy ORM (user, parcel, title, encumbrance, correction)</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; schemas/ &nbsp;&nbsp;<span style="color:#57606a"># Pydantic request/response schemas</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; routers/ &nbsp;&nbsp;<span style="color:#57606a"># FastAPI route handlers</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; deps.py &nbsp;&nbsp;&nbsp;<span style="color:#57606a"># JWT &rarr; User dependency injection</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; database.py <span style="color:#57606a"># SQLAlchemy engine + session</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; main.py &nbsp;&nbsp;&nbsp;<span style="color:#57606a"># App entry point; DB init; admin seed</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; requirements.txt<br>
+      &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; Dockerfile<br>
+      &#9500;&#9472;&#9472; <strong>frontend/</strong><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; src/<br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; api/index.js &nbsp;&nbsp;&nbsp;<span style="color:#57606a"># Axios wrappers for all endpoints</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; stores/auth.js &nbsp;<span style="color:#57606a"># Pinia: token, user, role helpers</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; router/index.js <span style="color:#57606a"># Vue Router: 21 routes, auth guard</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; assets/main.css <span style="color:#57606a"># Global design system</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; components/ &nbsp;&nbsp;&nbsp;<span style="color:#57606a"># StatusBadge.vue</span><br>
+      &#9474;&nbsp;&nbsp; &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; views/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#57606a"># 23 page views (parcels/titles/enc/corrections/query/admin)</span><br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; index.html<br>
+      &#9474;&nbsp;&nbsp; &#9500;&#9472;&#9472; vite.config.js<br>
+      &#9474;&nbsp;&nbsp; &#9492;&#9472;&#9472; Dockerfile<br>
+      &#9492;&#9472;&#9472; docker-compose.yml
+    </div>
+  </div>
+
+  <!-- 8. QUICK START -->
+  <div class="section">
+    <h2>8. Quick Start</h2>
+    <table>
+      <thead><tr><th>Step</th><th>Command</th></tr></thead>
+      <tbody>
+        <tr><td>1. Copy env file</td><td><code>Copy-Item backend\.env.example backend\.env</code></td></tr>
+        <tr><td>2. Start all services</td><td><code>docker compose up --build</code></td></tr>
+        <tr><td>3. Open app</td><td><a href="http://localhost:5173">http://localhost:5173</a></td></tr>
+        <tr><td>4. API docs</td><td><a href="http://localhost:8000/docs">http://localhost:8000/docs</a></td></tr>
+        <tr><td>5. Default login</td><td><code>admin@loh.local</code> / <code>admin</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>
